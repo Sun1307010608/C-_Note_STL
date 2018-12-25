@@ -1,0 +1,55 @@
+#include<iostream>
+#include<list>
+#include<vector>
+#include<algorithm>
+#include<iterator>
+
+using std::cout;
+using std::endl;
+using std::vector;
+using std::list;
+
+template <typename Container>
+void printContainer(const Container& con, std::string str)
+{
+	std::cout << "-----------------------------------\n" << str.c_str();
+	for (Container::const_iterator it = con.begin(); it != con.end(); ++it)
+		std::cout << *it << " ";
+	std::cout << "\n";
+}
+
+int main()
+{
+	// ********** copy ********** // copy时需要注意目标空间的大小要足够大
+	vector<int> vt = { 1,2,3,4,5 };
+	list<int> lst = { 0,1,2 };
+	//copy(vt.begin(), vt.end(), lst.begin()); // 报错！目标容器的空间不够会报错
+	copy(vt.begin(), vt.end(), back_inserter(lst)); //对于目标容器的空间不够，可以使用back_inserter方法
+	printContainer(vt, "now, 容器vt中内容为："); // 1 2 3 4 5
+	printContainer(lst, "now, 容器lst中内容为："); // 0 1 2 1 2 3 4 5
+	vector<int> vt2(vt.size() * 4);
+	printContainer(vt2, "now, 容器vt2中内容为："); // 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+	copy(vt.begin(), vt.end(), vt2.begin()); // 结果：1 2 3 4 5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+	copy(vt.begin(), vt.end(), vt2.begin()); // 只会copy到指定的位置 结果：1 2 3 4 5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+	printContainer(vt2, "now, 容器vt2中内容为："); // 1 2 3 4 5 0 0 0 0 0 0 0 0 0 0 1 2 3 4 5
+	//copy(vt.begin(), vt.end(), vt2.end()); 报错
+	copy(vt.begin(), vt.end(), vt2.begin() + vt.size());
+	printContainer(vt2, "now, 容器vt2中内容为："); // 1 2 3 4 5 1 2 3 4 5 0 0 0 0 0 0 0 0 0 0
+
+	// ********** copy_backward ********** copy_backward 从后往前拷贝
+	copy_backward(vt.begin(), vt.end(), vt2.end());
+	printContainer(vt2, "now, 容器vt2中内容为："); // 1 2 3 4 5 1 2 3 4 5 0 0 0 0 0 1 2 3 4 5
+	copy(vt.rbegin(), vt.rend(), vt2.end() - vt.size()); // 使用逆序迭代器，反向拷贝
+	printContainer(vt2, "now, 容器vt2中内容为："); // 1 2 3 4 5 1 2 3 4 5 0 0 0 0 0 5 4 3 2 1
+	reverse_copy(vt.begin(), vt.end(), vt2.end() - vt.size()); // ** 效果与上面使用逆向迭代器相同，反向copy
+	printContainer(vt2, "now, 容器vt2中内容为："); // 1 2 3 4 5 1 2 3 4 5 0 0 0 0 0 5 4 3 2 1
+	reverse_copy(vt.rbegin(), vt.rend(), vt2.end() - vt.size()); //两次反向，相当于顺序copy
+	printContainer(vt2, "now, 容器vt2中内容为："); // 1 2 3 4 5 1 2 3 4 5 0 0 0 0 0 1 2 3 4 5
+
+
+	copy(vt2.begin(), vt2.end(), std::ostream_iterator<int>(cout, " ")); // 将区间中元素copy到输出流，即输出；
+	std::cout << std::endl;
+
+	system("pause");
+	return 0;
+}
